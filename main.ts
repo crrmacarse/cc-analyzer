@@ -4,23 +4,9 @@ import { EXCEL_FILE_PATH } from './config'
 
 // receive date and string value
 const main = () => {
-    const config = init()
+    const { table: bill } = init()
 
-    const split = config.table.split('\\n');
-
-    const grouped = split.map((s: any) => {
-        const [transDate, postDate, ...rest] = s.split(' ');
-        const merchant = rest.slice(0, rest.length - 1).join(' ')
-
-        return {
-            transDate,
-            postDate,
-            merchant,
-            amount: rest.pop()
-        }
-    })
-
-    console.log(grouped)
+   analayzeSecBank(bill)
 }
 
 const init = () => {
@@ -35,6 +21,24 @@ const init = () => {
     program.parse();
 
     return program.opts()
+}
+
+const analayzeSecBank = (bill: string) => {
+    const split = bill.split('\\n');
+
+    const grouped = split.map((s: any) => {
+        const [transDate, postDate, ...rest] = s.split(' ');
+        const merchant = rest.slice(0, rest.length - 1).join(' ')
+
+        return {
+            transDate,
+            postDate,
+            merchant,
+            amount: rest.pop()
+        }
+    })
+
+    console.log(grouped)
 }
 
 const excelReader = async () => {
