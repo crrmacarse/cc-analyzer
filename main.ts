@@ -5,9 +5,13 @@ import { EXCEL_FILE_PATH } from './config'
 
 // receive date and string value
 const main = () => {
-    const { table: bill } = init()
+    const { table: bill, card } = init()
 
-   analayzeSecBank(bill)
+    if (!card || !bill) {
+        throw Error('Incomplete required field')
+    }
+
+   analayzeSecBank(card, bill)
 }
 
 const init = () => {
@@ -16,6 +20,7 @@ const init = () => {
     program
         .name('cc-analyzer')
         .option('-b, --bank <string>', 'Bank')
+        .option('-c --card <string>', 'Card')
         .option('-d, --date <string>', 'Statement Date')
         .option('-t, --table <string>', 'Statement table');
 
@@ -24,7 +29,7 @@ const init = () => {
     return program.opts()
 }
 
-const analayzeSecBank = async (bill: string) => {
+const analayzeSecBank = async (card: string, bill: string) => {
     const split = bill.split('\\n');
 
     const data = split.map((s: any) => {
@@ -42,7 +47,11 @@ const analayzeSecBank = async (bill: string) => {
         }
     })
 
-    await fs.writeFile(`./dump/test.csv`, data.filter(d => !d.skip).map((d) => {
+
+    const d = new Date().toLocaleString('default', { month: 'short', year: "numeric" })
+    const filename = `${d} ${card}.csv`;
+
+    await fs.writeFile(`./dump/${filename}`, data.sort((a, b) => +new Date(a.transDate) - +new Date(b.transDate)).filter(d => !d.skip).map((d) => {
        return d.str
     }).join('\n'))
     console.log(data)
