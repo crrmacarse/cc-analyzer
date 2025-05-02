@@ -4,6 +4,7 @@ import argparse
 from PyPDF2 import PdfReader
 import re
 
+# parse passed params
 parser = argparse.ArgumentParser(description="CC Analyzer")
 parser.add_argument("--sheet-name", required=True, help="Name of the Google Sheet")
 parser.add_argument("--billing-period", required=True, help="Name of the worksheet to create")
@@ -12,18 +13,20 @@ parser.add_argument("--pdf-password", required=True, help="Password for the PDF 
 
 args = parser.parse_args()
 
+# load passed params to variables
 sheet_name = args.sheet_name
 billing_period = args.billing_period
 pdf_path = args.pdf_path
 pdf_password = args.pdf_password
 
-# Read PDF file
+# read PDF file
 reader = PdfReader(pdf_path)
 
-# Decrypt PDF password
+# decrypt PDF password
 if reader.is_encrypted:
     reader.decrypt(pdf_password)
 
+# TODO: remove CR and Payments
 pdf_data = []
 
 for page in reader.pages:
@@ -56,13 +59,15 @@ row_length = str(len(pdf_data) + 10)
 # create new worksheet
 new_worksheet = sheet.add_worksheet(title=billing_period, rows=row_length, cols="20")
 
-# TODO: Doesn't work
+# TODO: doesn't work
 # reorder worksheets to put the new worksheet at the left
 worksheets = sheet.worksheets()
 sheet.reorder_worksheets([new_worksheet] + [ws for ws in worksheets if ws != new_worksheet])
 
-# Append column headers
+# header columns
+header_cell_format = gspread.format.CellFormat(textFormat={"bold": True})
 new_worksheet.append_row(["Transaction", "Post date", "Merchant", "Amount", "Notes", "Shoulder", "C", "S"])
+new_worksheet.format("A1:H1", header_cell_format)
 
 # TODO: Add summary
 
