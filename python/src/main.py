@@ -3,6 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import argparse
 from PyPDF2 import PdfReader
 import re
+from gspread_formatting import format_cell_range, CellFormat, TextFormat
 
 # parse passed params
 parser = argparse.ArgumentParser(description="CC Analyzer")
@@ -29,14 +30,13 @@ if reader.is_encrypted:
 # TODO: remove CR and Payments
 pdf_data = []
 
+# extract row data from PDF
 for page in reader.pages:
     text = page.extract_text()
 
-    # Define a regular expression to match rows in the table
     table_pattern = re.compile(r"(\d{2}/\d{2}/\d{2})\s+(\d{2}/\d{2}/\d{2})\s+(.+?)\s+([\d,]+\.\d{2})")
     matches = table_pattern.findall(text)
 
-    # Print the extracted rows
     for match in matches:
         tran_date, post_date, description, amount = match
         pdf_data.append([tran_date, post_date, description, amount, "", "", "", ""])
@@ -65,9 +65,11 @@ worksheets = sheet.worksheets()
 sheet.reorder_worksheets([new_worksheet] + [ws for ws in worksheets if ws != new_worksheet])
 
 # header columns
-header_cell_format = gspread.format.CellFormat(textFormat={"bold": True})
+header_format = CellFormat(textFormat=TextFormat(bold=True))
 new_worksheet.append_row(["Transaction", "Post date", "Merchant", "Amount", "Notes", "Shoulder", "C", "S"])
-new_worksheet.format("A1:H1", header_cell_format)
+
+# apply bold text format to first row
+format_cell_range(new_worksheet, "1:1", header_format)
 
 # TODO: Add summary
 
