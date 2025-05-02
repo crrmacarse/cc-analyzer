@@ -28,6 +28,7 @@ if reader.is_encrypted:
     reader.decrypt(pdf_password)
 
 pdf_data = []
+total_amount = 0
 
 # extract row data from PDF
 for page in reader.pages:
@@ -40,6 +41,7 @@ for page in reader.pages:
         tran_date, post_date, description, amount = match
         # skips payment transactions
         if not description.startswith("PAYMENT"):
+            total_amount += float(amount.replace(",", ""))
             pdf_data.append([tran_date, post_date, description, amount, "", "", "", ""])
 
 # Google Sheets API setup
@@ -76,6 +78,9 @@ format_cell_range(new_worksheet, "1:1", header_format)
 
 # load pulled pdf data to worksheet
 new_worksheet.append_rows(pdf_data, value_input_option="USER_ENTERED")
+
+# add total row
+new_worksheet.append_row(["", "", "", f"{total_amount:,.2f}"], value_input_option="USER_ENTERED")
 
 sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet.id}"
 print("Success", sheet_url)
