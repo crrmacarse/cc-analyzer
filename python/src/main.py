@@ -27,7 +27,6 @@ reader = PdfReader(pdf_path)
 if reader.is_encrypted:
     reader.decrypt(pdf_password)
 
-# TODO: remove CR and Payments
 pdf_data = []
 
 # extract row data from PDF
@@ -39,7 +38,9 @@ for page in reader.pages:
 
     for match in matches:
         tran_date, post_date, description, amount = match
-        pdf_data.append([tran_date, post_date, description, amount, "", "", "", ""])
+        # skips payment transactions
+        if not description.startswith("PAYMENT"):
+            pdf_data.append([tran_date, post_date, description, amount, "", "", "", ""])
 
 # Google Sheets API setup
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]

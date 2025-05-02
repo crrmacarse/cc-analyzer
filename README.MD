@@ -26,7 +26,7 @@ python3 src/main.py --sheet-name "NAME_OF_GOOGLE_SHEET" --billing-period "MMMM Y
 
 > Supported Credit Card: Security Bank
 
-## Node Implementation (DEPRECATED)
+## Node Implementation (Deprecated)
 
 ```
 npm run start -- --bank <bank> --card <card> --table <string of table>
