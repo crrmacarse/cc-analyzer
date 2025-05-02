@@ -3,13 +3,14 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 import argparse
 
+# TODO: Add file from Secbank itself
 parser = argparse.ArgumentParser(description="CC Analyzer")
 parser.add_argument("--sheet-name", required=True, help="Name of the Google Sheet")
+parser.add_argument("--billing-period", required=True, help="Name of the worksheet to create")
 args = parser.parse_args()
 
 sheet_name = args.sheet_name
-
-sheet_name = sys.argv[1]  # Get the sheet name from the command-line arguments
+billing_period = args.billing_period
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
@@ -18,9 +19,12 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("src/credentials.json",
 client = gspread.authorize(creds)
 sheet = client.open(sheet_name)
 
-# TODO: Depending on passed param
-current_month_year = datetime.now().strftime("%B %Y")
-new_worksheet = sheet.add_worksheet(title=current_month_year, rows="100", cols="20")
+# Check if a worksheet with the same name already exists
+existing_titles = [ws.title for ws in sheet.worksheets()]
+if billing_period in existing_titles:
+    raise ValueError(f"The following billing period already exists('{billing_period}')!")
+
+new_worksheet = sheet.add_worksheet(title=billing_period, rows="100", cols="20")
 
 # Reorder worksheets to make the new worksheet the leftmost (first)
 worksheets = sheet.worksheets()

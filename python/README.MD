@@ -13,8 +13,8 @@ pip install -r requirements.txt
 ## Running the app
 
 ```
-python3 src/main.py --sheet-name "NAME_OF_GOOGLE_SHEET"
+python3 src/main.py --sheet-name "NAME_OF_GOOGLE_SHEET" --billing-period "MONTH YEAR" 
 
 # Example
-python3 src/main.py --sheet-name "Security Bank World CC"
+python3 src/main.py --sheet-name "Security Bank World CC" --billing-period "April 2025"
 ```
